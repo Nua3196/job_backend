@@ -1,3 +1,4 @@
+import random
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -85,7 +86,7 @@ def crawl_saramin(keyword, pages=1):
                     continue
 
             print(f"{page}페이지 크롤링 완료")
-            time.sleep(1)  # 서버 부하 방지를 위한 딜레이
+            time.sleep(random.uniform(1, 3))  # 서버 부하 방지를 위한 딜레이
 
         except requests.RequestException as e:
             print(f"페이지 요청 중 에러 발생: {e}")
@@ -99,4 +100,4 @@ if __name__ == "__main__":
     # 'python' 키워드로 3페이지 크롤링
     df = crawl_saramin('python', pages=1)
     print(df)
-    df.to_csv('saramin_python.csv', index=False)
+    df.to_csv('saramin_python.csv', index=False, encoding="UTF-8")
