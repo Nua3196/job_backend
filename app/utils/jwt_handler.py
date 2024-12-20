@@ -20,6 +20,7 @@ def generate_refresh_token(payload):
         payload['exp'] = datetime.datetime.utcnow() + JWT_REFRESH_TOKEN_EXPIRES
         return jwt.encode(payload, REFRESH_SECRET_KEY, algorithm='HS256')
     except Exception as e:
+        print(f"Error generating access token: {e}")
         raise ValueError(f"Error generating refresh token: {e}")
 
 def decode_token(token, is_refresh=False):
@@ -30,8 +31,10 @@ def decode_token(token, is_refresh=False):
         secret_key = REFRESH_SECRET_KEY if is_refresh else SECRET_KEY
         return jwt.decode(token, secret_key, algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
+        print("Token has expired")
         return {"error": "Token expired"}
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"Invalid token: {e}")
         return {"error": "Invalid token"}
     except Exception as e:
         print(f"Unexpected error during token decoding: {str(e)}")

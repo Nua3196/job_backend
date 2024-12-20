@@ -1,0 +1,210 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Job Management API"
+  description: "Comprehensive API documentation for the Job Management System."
+host: "localhost:5000"
+basePath: "/api"
+schemes:
+  - "http"
+paths:
+  /auth/signup:
+    post:
+      summary: "User Signup"
+      description: "Registers a new user account."
+      tags:
+        - "Auth"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User registration data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              password:
+                type: "string"
+              role:
+                type: "string"
+                enum: ["admin", "employer", "applicant"]
+              company_name:
+                type: "string"
+                description: "Required if the role is 'employer'"
+              company_link:
+                type: "string"
+                description: "Required if the role is 'employer'"
+      responses:
+        201:
+          description: "User created successfully."
+        400:
+          description: "Validation error."
+        500:
+          description: "Internal server error."
+  /auth/login:
+    post:
+      summary: "User Login"
+      description: "Logs in a user and provides access and refresh tokens."
+      tags:
+        - "Auth"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User login data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Login successful. Returns tokens."
+        401:
+          description: "Invalid credentials."
+        500:
+          description: "Internal server error."
+  /companies:
+    get:
+      summary: "List Companies"
+      description: "Fetches a list of all registered companies."
+      tags:
+        - "Company"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "List of companies."
+        500:
+          description: "Internal server error."
+    post:
+      summary: "Add Company"
+      description: "Creates a new company. Requires admin access."
+      tags:
+        - "Company"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Company creation data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              link:
+                type: "string"
+      responses:
+        201:
+          description: "Company created successfully."
+        400:
+          description: "Validation error."
+        500:
+          description: "Internal server error."
+  /jobs:
+    get:
+      summary: "List Jobs"
+      description: "Retrieves all job postings with optional sorting and pagination."
+      tags:
+        - "Job"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "query"
+          name: "page"
+          description: "Page number."
+          type: "integer"
+        - in: "query"
+          name: "size"
+          description: "Page size."
+          type: "integer"
+        - in: "query"
+          name: "sort_by"
+          description: "Field to sort by."
+          type: "string"
+        - in: "query"
+          name: "order"
+          description: "Sort order (asc or desc)."
+          type: "string"
+      responses:
+        200:
+          description: "List of jobs."
+        500:
+          description: "Internal server error."
+    post:
+      summary: "Add Job"
+      description: "Creates a new job posting. Requires admin or employer access."
+      tags:
+        - "Job"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Job creation data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              title:
+                type: "string"
+              link:
+                type: "string"
+              career_condition:
+                type: "string"
+              education:
+                type: "string"
+              deadline:
+                type: "string"
+              job_sector:
+                type: "string"
+      responses:
+        201:
+          description: "Job created successfully."
+        400:
+          description: "Validation error."
+        500:
+          description: "Internal server error."
+  /stats/companies:
+    get:
+      summary: "Company Job Stats"
+      description: "Retrieves the count of jobs posted by each company."
+      tags:
+        - "Stats"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Job count per company."
+        500:
+          description: "Internal server error."
+  /stats/techs:
+    get:
+      summary: "Tech Job Stats"
+      description: "Retrieves the count of jobs requiring each technology."
+      tags:
+        - "Stats"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Job count per technology."
+        500:
+          description: "Internal server error."

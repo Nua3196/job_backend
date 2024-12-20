@@ -1,14 +1,41 @@
 from flask import Blueprint, jsonify, request
 from app.models.user_model import User
 from app.utils.jwt_handler import generate_access_token, generate_refresh_token, decode_token
+from app.utils.redis_client import add_to_blacklist, is_token_blacklisted
+from app.middlewares.auth import jwt_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    """
+    로그아웃 API
+    - 클라이언트에서 Refresh Token을 제공받아 블랙리스트에 추가
+    """
+    try:
+        data = request.json
+        refresh_token = data.get('refresh_token')
+
+        if not refresh_token:
+            return jsonify({"error": "Refresh token is required"}), 400
+
+        # Refresh Token 검증
+        decoded_token = decode_token(refresh_token, is_refresh=True)
+        if not decoded_token:
+            return jsonify({"error": "Invalid or expired refresh token"}), 401
+
+        # Refresh Token 블랙리스트 추가
+        add_to_blacklist(refresh_token)
+
+        return jsonify({"message": "Logged out successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     """
     회원가입 API
-    - 요청 데이터(JSON): email, password, role, company
+    - 요청 데이터(JSON): email, password, role, company (optional)
     - 사용자 추가 후 성공/실패 메시지 반환
     """
     try:
@@ -16,7 +43,6 @@ def signup():
         email = data.get('email')
         password = data.get('password')
         role = data.get('role', 'applicant')  # 기본 역할은 'applicant'
-        company = data.get('company')  # 선택적 필드
 
         # 필수 입력값 검증
         if not email or not password:
@@ -30,12 +56,25 @@ def signup():
         if role not in ['admin', 'applicant', 'employer']:
             return jsonify({"error": f"Invalid role: {role}"}), 400
 
+        company_id = None  # 기본 회사 ID는 None
+
+        if role == 'employer':
+            # 회사 이름 및 링크 입력 확인
+            company_name = data.get('company_name')
+            company_link = data.get('company_link')
+            if not company_name or not company_link:
+                return jsonify({"error": "Company name and link are required for employers"}), 400
+
+            # 회사 정보 확인 또는 생성
+            company_id = Company.get_or_create(company_name, company_link)
+
         # 사용자 추가
-        result = User.add_user(email, password, role, company)
+        result = User.add_user(email, password, role, company_id)
         if "error" in result:
             return jsonify(result), 400
 
         return jsonify(result), 201
+
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
@@ -56,7 +95,7 @@ def login():
         # 사용자 인증
         user = User.authenticate(email, password)
         if user:
-            payload = {"id": user.id, "email": user.email, "role": user.role}
+            payload = {"id": user.id, "email": user.email, "role": user.role, "company": user.company}
             access_token = generate_access_token(payload)
             refresh_token = generate_refresh_token(payload)
             return jsonify({
@@ -82,31 +121,24 @@ def refresh():
         if not refresh_token:
             return jsonify({"error": "Refresh token is required"}), 400
 
-        # Refresh 토큰 검증
-        decoded_payload = decode_token(refresh_token, is_refresh=True)
-        if not decoded_payload:
-            return jsonify({"error": "Invalid or expired refresh token"}), 401
+        # 블랙리스트 확인
+        if is_token_blacklisted(refresh_token):
+            return jsonify({"error": "This token has been logged out"}), 403
 
-        # 필수 키 검증
-        required_keys = {"id", "email", "role"}
-        if not required_keys.issubset(decoded_payload.keys()):
-            return jsonify({"error": "Invalid token payload"}), 400
+        # Refresh Token 검증
+        decoded_token = decode_token(refresh_token, is_refresh=True)
+        if not decoded_token:
+            return jsonify({"error": "Invalid or expired refresh token"}), 401
 
         # 새로운 Access 토큰 발급
         access_token = generate_access_token({
-            "id": decoded_payload['id'],
-            "email": decoded_payload['email'],
-            "role": decoded_payload['role']
+            "id": decoded_token['id'],
+            "email": decoded_token['email'],
+            "role": decoded_token['role']
         })
         return jsonify({"access_token": access_token}), 200
-
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
-from flask import Blueprint, jsonify, request
-from app.models.user_model import User
-from app.utils.jwt_handler import decode_token
-from app.middlewares.auth import jwt_required
 
 @auth_bp.route('/profile', methods=['PUT'])
 @jwt_required()  # JWT 인증 필요

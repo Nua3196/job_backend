@@ -1,4 +1,6 @@
 from functools import wraps
+from flask import request, jsonify
+from app.utils.jwt_handler import decode_token
 
 def jwt_required(required_roles=None):
     """
@@ -20,6 +22,9 @@ def jwt_required(required_roles=None):
 
             if not decoded_token:
                 return jsonify({"error": "Invalid or expired token"}), 401
+
+            # 디버깅 출력
+            print(f"Decoded token: {decoded_token}")
 
             # 역할 확인
             if required_roles and decoded_token.get('role') not in required_roles:

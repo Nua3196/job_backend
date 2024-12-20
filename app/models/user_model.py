@@ -4,11 +4,12 @@ import re
 import os
 
 class User:
-    def __init__(self, id, email, password, role):
+    def __init__(self, id, email, password, role, company=None):
         self.id = id
         self.email = email
         self.password = password  # Base64로 인코딩된 비밀번호
         self.role = role
+        self.company = company
 
     @staticmethod
     def encode_password(password):
@@ -54,7 +55,7 @@ class User:
         db = get_db()
         cursor = db.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT id, email, password, role FROM user WHERE email = %s", (email,))
+            cursor.execute("SELECT id, email, password, role, company FROM user WHERE email = %s", (email,))
             user_data = cursor.fetchone()
             if user_data:
                 return User(**user_data)  # User 객체로 변환
@@ -67,13 +68,11 @@ class User:
     def add_user(email, password, role, company=None):
         """
         사용자를 user 테이블에 추가하거나 기존 사용자 ID를 반환.
-
         Args:
             email (str): 사용자 이메일
             password (str): 평문 비밀번호
-            role (str): 사용자 역할 ('admin', 'creator', 'applicant' 등)
+            role (str): 사용자 역할 ('admin', 'employer', 'applicant' 등)
             company (int, optional): 회사 ID (기본값: None)
-
         Returns:
             dict: 사용자 ID 또는 오류 메시지
         """
@@ -83,6 +82,14 @@ class User:
         # 이메일 형식 검증
         if not User.is_valid_email(email):
             return {"error": f"Invalid email format: {email}"}
+
+        # employer인 경우 company 필드 필수
+        if role == 'employer' and not company:
+            return {"error": "Company ID is required for employers"}
+
+        # company 유효성 검증
+        if company and not Company.validate(company):
+            return {"error": f"Invalid company ID: {company}"}
 
         try:
             # 이미 존재하는 이메일인지 확인
@@ -109,6 +116,7 @@ class User:
         finally:
             cursor.close()
             db.close()
+
 
     @staticmethod
     def verify_password(input_password, stored_password):
@@ -170,7 +178,8 @@ class User:
         return {
             'id': self.id,
             'email': self.email,
-            'role': self.role
+            'role': self.role,
+            'company': self.company
         }
 
     @staticmethod
@@ -185,6 +194,11 @@ class User:
         """
         db = get_db()
         cursor = db.cursor()
+
+        # company 유효성 검증
+        if 'company' in fields and not Company.validate(fields['company']):
+            return {"error": f"Invalid company ID: {fields['company']}"}
+
         try:
             set_clause = ", ".join(f"{key} = %s" for key in fields.keys())
             values = list(fields.values()) + [user_id]
@@ -195,6 +209,7 @@ class User:
             return {"error": f"Failed to update user: {str(e)}"}
         finally:
             cursor.close()
+
 
     @staticmethod
     def delete_user(user_id):

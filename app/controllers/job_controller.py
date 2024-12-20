@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.models.job_model import Job
+from app.utils.jwt_handler import decode_token
 
 # Blueprint: API 엔드포인트 그룹화
 job_bp = Blueprint('job', __name__, url_prefix='/api/jobs')
@@ -40,33 +41,64 @@ from app.middlewares.auth import jwt_required
 @jwt_required(required_roles=['admin', 'employer'])
 def add_job():
     """
-    새로운 공고를 생성.
-    - 요청 데이터(JSON): title, company, creator, career_condition, education, deadline, job_sector
+    새로운 공고를 생성
+    - 요청 데이터(JSON): title, link, career_condition, education, deadline, job_sector
     """
     try:
+        # JWT 토큰에서 사용자 정보 추출
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(" ")[1]
+        decoded_token = decode_token(token)
+
+        user_id = decoded_token.get('id')
+        role = decoded_token.get('role')
+        company_id = None
+
+        # 역할에 따라 company 설정
+        if role == 'admin':
+            # admin은 JSON에서 company 정보를 받음
+            company_id = request.json.get('company')
+            if not company_id:
+                return jsonify({"error": "Company ID is required for admin users"}), 400
+
+            # company 유효성 검증
+            if not Job.validate_company(company_id):
+                return jsonify({"error": f"Invalid company ID: {company_id}"}), 400
+
+        elif role == 'employer':
+            # employer는 JWT에서 company 정보를 가져옴
+            company_id = decoded_token.get('company')
+            if not company_id:
+                return jsonify({"error": "No company associated with the employer"}), 400
+
+        # 요청 데이터 검증
         data = request.json
         if not data:
             return jsonify({"error": "Invalid input"}), 400
 
-        # 필수 필드 검증
-        required_fields = ["title", "company", "creator"]
+        required_fields = ["title", "link", "career_condition", "education", "deadline", "job_sector"]
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"error": f"'{field}' is required"}), 400
-
-        # 회사 및 생성자 유효성 확인 (Optional)
-        if not Job.validate_company(data["company"]):
-            return jsonify({"error": f"Invalid company ID: {data['company']}"}), 400
-
-        if not Job.validate_creator(data["creator"]):
-            return jsonify({"error": f"Invalid creator ID: {data['creator']}"}), 400
 
         # 중복 링크 확인
         if Job.is_duplicate_link(data["link"]):
             return jsonify({"error": f"Duplicate job link: {data['link']}"}), 400
 
+        # 공고 데이터 생성
+        job_data = {
+            "creator": user_id,  # creator는 사용자 ID
+            "company": company_id,
+            "title": data["title"],
+            "link": data["link"],
+            "career_condition": data["career_condition"],
+            "education": data["education"],
+            "deadline": data["deadline"],
+            "job_sector": data["job_sector"]
+        }
+
         # 공고 생성
-        result = Job.create(data)
+        result = Job.create(job_data)
         return jsonify(result), 201
 
     except Exception as e:

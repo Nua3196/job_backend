@@ -212,3 +212,144 @@
 2024-12-20 21:45:20,963 INFO:  * Restarting with stat
 2024-12-20 21:45:21,489 WARNING:  * Debugger is active!
 2024-12-20 21:45:21,493 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 21:49:53,630 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-20 21:49:53,630 INFO: [33mPress CTRL+C to quit[0m
+2024-12-20 21:49:53,632 INFO:  * Restarting with stat
+2024-12-20 21:49:54,256 WARNING:  * Debugger is active!
+2024-12-20 21:49:54,260 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 21:50:00,532 INFO: 127.0.0.1 - - [20/Dec/2024 21:50:00] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 21:52:46,447 INFO: 127.0.0.1 - - [20/Dec/2024 21:52:46] "[33mPOST /api/api/auth/logout HTTP/1.1[0m" 404 -
+2024-12-20 21:53:42,607 INFO: 127.0.0.1 - - [20/Dec/2024 21:53:42] "[33mPOST /api/api/auth/logout HTTP/1.1[0m" 404 -
+2024-12-20 21:53:54,236 INFO: 127.0.0.1 - - [20/Dec/2024 21:53:54] "POST /api/auth/logout HTTP/1.1" 200 -
+2024-12-20 21:54:52,933 INFO: 127.0.0.1 - - [20/Dec/2024 21:54:52] "[31m[1mPOST /api/auth/refresh HTTP/1.1[0m" 403 -
+2024-12-20 21:56:43,665 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-20 21:56:43,666 INFO: [33mPress CTRL+C to quit[0m
+2024-12-20 21:56:43,668 INFO:  * Restarting with stat
+2024-12-20 21:56:44,324 WARNING:  * Debugger is active!
+2024-12-20 21:56:44,329 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 21:57:29,786 INFO: 127.0.0.1 - - [20/Dec/2024 21:57:29] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 21:58:14,983 INFO: 127.0.0.1 - - [20/Dec/2024 21:58:14] "[32mGET /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 21:58:14,988 INFO: 127.0.0.1 - - [20/Dec/2024 21:58:14] "GET /api/jobs/ HTTP/1.1" 200 -
+2024-12-20 21:59:29,392 INFO: 127.0.0.1 - - [20/Dec/2024 21:59:29] "GET /api/stats/companies HTTP/1.1" 200 -
+2024-12-20 21:59:48,421 INFO: 127.0.0.1 - - [20/Dec/2024 21:59:48] "GET /api/stats/techs HTTP/1.1" 200 -
+2024-12-20 22:04:37,417 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\job_controller.py', reloading
+2024-12-20 22:04:37,468 INFO:  * Restarting with stat
+2024-12-20 22:04:38,098 WARNING:  * Debugger is active!
+2024-12-20 22:04:38,102 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:10:18,178 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\company_model.py', reloading
+2024-12-20 22:10:18,228 INFO:  * Restarting with stat
+2024-12-20 22:10:18,914 WARNING:  * Debugger is active!
+2024-12-20 22:10:18,919 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:11:14,896 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\auth_controller.py', reloading
+2024-12-20 22:11:14,963 INFO:  * Restarting with stat
+2024-12-20 22:11:15,621 WARNING:  * Debugger is active!
+2024-12-20 22:11:15,626 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:15:49,843 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-20 22:15:49,843 INFO: [33mPress CTRL+C to quit[0m
+2024-12-20 22:15:49,845 INFO:  * Restarting with stat
+2024-12-20 22:15:50,469 WARNING:  * Debugger is active!
+2024-12-20 22:15:50,473 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:16:09,156 INFO: 127.0.0.1 - - [20/Dec/2024 22:16:09] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 22:18:09,693 INFO: 127.0.0.1 - - [20/Dec/2024 22:18:09] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:18:09,696 ERROR: Unexpected error: name 'request' is not defined
+2024-12-20 22:18:09,696 INFO: 127.0.0.1 - - [20/Dec/2024 22:18:09] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 500 -
+2024-12-20 22:19:44,323 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\middlewares\\auth.py', reloading
+2024-12-20 22:19:44,386 INFO:  * Restarting with stat
+2024-12-20 22:19:45,052 WARNING:  * Debugger is active!
+2024-12-20 22:19:45,055 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:19:58,648 INFO: 127.0.0.1 - - [20/Dec/2024 22:19:58] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:19:58,652 ERROR: Unexpected error: name 'jsonify' is not defined
+2024-12-20 22:19:58,653 INFO: 127.0.0.1 - - [20/Dec/2024 22:19:58] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 500 -
+2024-12-20 22:20:34,884 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\middlewares\\auth.py', reloading
+2024-12-20 22:20:34,940 INFO:  * Restarting with stat
+2024-12-20 22:20:35,574 WARNING:  * Debugger is active!
+2024-12-20 22:20:35,578 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:20:37,210 INFO: 127.0.0.1 - - [20/Dec/2024 22:20:37] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:20:37,213 INFO: 127.0.0.1 - - [20/Dec/2024 22:20:37] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 401 -
+2024-12-20 22:20:59,795 INFO: 127.0.0.1 - - [20/Dec/2024 22:20:59] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:20:59,798 ERROR: Unexpected error: name 'decode_token' is not defined
+2024-12-20 22:20:59,799 INFO: 127.0.0.1 - - [20/Dec/2024 22:20:59] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 500 -
+2024-12-20 22:21:55,019 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\job_controller.py', reloading
+2024-12-20 22:21:55,067 INFO:  * Restarting with stat
+2024-12-20 22:21:55,694 WARNING:  * Debugger is active!
+2024-12-20 22:21:55,699 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:22:29,291 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\job_controller.py', reloading
+2024-12-20 22:22:29,336 INFO:  * Restarting with stat
+2024-12-20 22:22:29,960 WARNING:  * Debugger is active!
+2024-12-20 22:22:29,966 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:25:54,390 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\middlewares\\auth.py', reloading
+2024-12-20 22:25:54,437 INFO:  * Restarting with stat
+2024-12-20 22:25:55,090 WARNING:  * Debugger is active!
+2024-12-20 22:25:55,095 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:27:07,327 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\job_controller.py', reloading
+2024-12-20 22:27:07,376 INFO:  * Restarting with stat
+2024-12-20 22:27:08,016 WARNING:  * Debugger is active!
+2024-12-20 22:27:08,021 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:27:16,794 INFO: 127.0.0.1 - - [20/Dec/2024 22:27:16] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:27:16,798 INFO: 127.0.0.1 - - [20/Dec/2024 22:27:16] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 403 -
+2024-12-20 22:28:45,729 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\middlewares\\auth.py', reloading
+2024-12-20 22:28:45,777 INFO:  * Restarting with stat
+2024-12-20 22:28:46,394 WARNING:  * Debugger is active!
+2024-12-20 22:28:46,398 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:28:50,313 INFO: 127.0.0.1 - - [20/Dec/2024 22:28:50] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:28:50,317 INFO: 127.0.0.1 - - [20/Dec/2024 22:28:50] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 403 -
+2024-12-20 22:32:04,541 INFO: 127.0.0.1 - - [20/Dec/2024 22:32:04] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 22:32:37,573 INFO: 127.0.0.1 - - [20/Dec/2024 22:32:37] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:32:37,577 INFO: 127.0.0.1 - - [20/Dec/2024 22:32:37] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 403 -
+2024-12-20 22:33:21,102 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\utils\\jwt_handler.py', reloading
+2024-12-20 22:33:21,158 INFO:  * Restarting with stat
+2024-12-20 22:33:21,793 WARNING:  * Debugger is active!
+2024-12-20 22:33:21,798 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:33:25,426 INFO: 127.0.0.1 - - [20/Dec/2024 22:33:25] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:33:25,431 ERROR: Unexpected error: cannot access local variable 'e' where it is not associated with a value
+2024-12-20 22:33:25,431 INFO: 127.0.0.1 - - [20/Dec/2024 22:33:25] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 500 -
+2024-12-20 22:34:01,521 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\utils\\jwt_handler.py', reloading
+2024-12-20 22:34:01,577 INFO:  * Restarting with stat
+2024-12-20 22:34:02,218 WARNING:  * Debugger is active!
+2024-12-20 22:34:02,222 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:34:05,870 INFO: 127.0.0.1 - - [20/Dec/2024 22:34:05] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:34:05,875 INFO: 127.0.0.1 - - [20/Dec/2024 22:34:05] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 403 -
+2024-12-20 22:41:46,608 INFO: 127.0.0.1 - - [20/Dec/2024 22:41:46] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:41:46,613 INFO: 127.0.0.1 - - [20/Dec/2024 22:41:46] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 400 -
+2024-12-20 22:44:22,017 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\controllers\\auth_controller.py', reloading
+2024-12-20 22:44:22,098 INFO:  * Restarting with stat
+2024-12-20 22:44:22,756 WARNING:  * Debugger is active!
+2024-12-20 22:44:22,760 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:45:04,235 INFO: 127.0.0.1 - - [20/Dec/2024 22:45:04] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2024-12-20 22:47:36,013 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\user_model.py', reloading
+2024-12-20 22:47:36,057 INFO:  * Restarting with stat
+2024-12-20 22:47:36,698 WARNING:  * Debugger is active!
+2024-12-20 22:47:36,702 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:47:40,279 INFO: 127.0.0.1 - - [20/Dec/2024 22:47:40] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 22:48:31,340 INFO: 127.0.0.1 - - [20/Dec/2024 22:48:31] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:48:31,344 INFO: 127.0.0.1 - - [20/Dec/2024 22:48:31] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 400 -
+2024-12-20 22:49:41,926 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\user_model.py', reloading
+2024-12-20 22:49:41,982 INFO:  * Restarting with stat
+2024-12-20 22:49:42,620 WARNING:  * Debugger is active!
+2024-12-20 22:49:42,627 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:52:40,798 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\user_model.py', reloading
+2024-12-20 22:52:40,846 INFO:  * Restarting with stat
+2024-12-20 22:52:41,509 WARNING:  * Debugger is active!
+2024-12-20 22:52:41,513 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:53:01,895 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\user_model.py', reloading
+2024-12-20 22:53:01,943 INFO:  * Restarting with stat
+2024-12-20 22:53:02,599 WARNING:  * Debugger is active!
+2024-12-20 22:53:02,604 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:53:25,015 INFO:  * Detected change in 'c:\\Users\\ROVE0405\\projects\\WSD\\job-backend\\app\\models\\company_model.py', reloading
+2024-12-20 22:53:25,064 INFO:  * Restarting with stat
+2024-12-20 22:53:25,690 WARNING:  * Debugger is active!
+2024-12-20 22:53:25,694 INFO:  * Debugger PIN: 860-976-868
+2024-12-20 22:53:38,301 INFO: 127.0.0.1 - - [20/Dec/2024 22:53:38] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 22:54:14,610 INFO: 127.0.0.1 - - [20/Dec/2024 22:54:14] "GET /api/stats/techs HTTP/1.1" 200 -
+2024-12-20 22:54:18,560 INFO: 127.0.0.1 - - [20/Dec/2024 22:54:18] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:54:18,576 INFO: 127.0.0.1 - - [20/Dec/2024 22:54:18] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 201 -
+2024-12-20 22:55:06,395 INFO: 127.0.0.1 - - [20/Dec/2024 22:55:06] "POST /api/auth/logout HTTP/1.1" 200 -
+2024-12-20 22:55:27,837 INFO: 127.0.0.1 - - [20/Dec/2024 22:55:27] "POST /api/auth/login HTTP/1.1" 200 -
+2024-12-20 22:56:03,657 INFO: 127.0.0.1 - - [20/Dec/2024 22:56:03] "GET /api/stats/techs HTTP/1.1" 200 -
+2024-12-20 22:56:34,804 INFO: 127.0.0.1 - - [20/Dec/2024 22:56:34] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:56:34,812 INFO: 127.0.0.1 - - [20/Dec/2024 22:56:34] "[31m[1mPOST /api/jobs/ HTTP/1.1[0m" 400 -
+2024-12-20 22:56:46,243 INFO: 127.0.0.1 - - [20/Dec/2024 22:56:46] "[32mPOST /api/jobs HTTP/1.1[0m" 308 -
+2024-12-20 22:56:46,258 INFO: 127.0.0.1 - - [20/Dec/2024 22:56:46] "[35m[1mPOST /api/jobs/ HTTP/1.1[0m" 201 -

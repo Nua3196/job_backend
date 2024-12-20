@@ -1,5 +1,6 @@
 import logging
 from flask import Flask, jsonify, request
+from flask_swagger_ui import get_swaggerui_blueprint
 import time
 from app.controllers import (
     auth_controller,
@@ -19,6 +20,12 @@ def create_app():
     app.register_blueprint(company_controller.company_bp)  # 회사 정보
     app.register_blueprint(user_controller.user_bp)  # 사용자 (북마크 및 지원 내역 포함)
     app.register_blueprint(stats_controller.stats_bp)  # 통계
+
+    # Swagger UI 설정
+    SWAGGER_URL = '/api/docs'
+    API_URL = '/static/swagger.yaml'  # YAML 파일 경로
+    swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL)
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
     # 로깅 설정
     logging.basicConfig(
