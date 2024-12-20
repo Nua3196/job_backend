@@ -10,7 +10,7 @@ def create_app():
     app = Flask(__name__)
 
     # 환경 설정 파일 로드
-    app.config.from_pyfile('../config.py')
+    app.config.from_pyfile('config.py')
 
     # 블루프린트 등록: 각 모듈별 라우팅 정의 연결
     app.register_blueprint(job_controller.job_bp)

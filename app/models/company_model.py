@@ -1,41 +1,10 @@
-import base64
 from app.utils.db import get_db
 
-class User:
-    def __init__(self, id, email, password, role):
+class Company:
+    def __init__(self, id, name, link):
         self.id = id
-        self.email = email
-        self.password = password  # Base64로 인코딩된 비밀번호
-        self.role = role
-
-    @staticmethod
-    def encode_password(password):
-        """
-        비밀번호를 Base64로 인코딩하는 메서드
-
-        Args:
-            password (str): 평문 비밀번호
-
-        Returns:
-            str: Base64로 인코딩된 비밀번호
-        """
-        salt = os.urandom(16)  # 16바이트 랜덤 Salt 생성
-        salted_password = salt + password.encode('utf-8')  # Salt 추가
-        return base64.b64encode(salted_password).decode('utf-8')
-    
-    @staticmethod
-    def is_valid_email(email):
-        """
-        이메일 형식을 검증하는 함수.
-
-        Args:
-            email (str): 입력된 이메일
-
-        Returns:
-            bool: 이메일이 유효하면 True, 그렇지 않으면 False
-        """
-        email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        return re.match(email_regex, email) is not None
+        self.name = name
+        self.link = link  # 상세정보 링크
 
     @staticmethod
     def get_user_by_email(email):
@@ -155,6 +124,3 @@ class User:
             'email': self.email,
             'role': self.role
         }
-
-class Bookmark:
-    def __init__(self, id, user, job, created)
