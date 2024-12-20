@@ -1,15 +1,22 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Flask 기본 설정
-SECRET_KEY = os.getenv('SECRET_KEY')  # Access 토큰 서명 키
-REFRESH_SECRET_KEY = os.getenv('REFRESH_SECRET_KEY')  # Refresh 토큰 서명 키
+SECRET_KEY = os.getenv('SECRET_KEY')
+REFRESH_SECRET_KEY = os.getenv('REFRESH_SECRET_KEY')
+
+if not SECRET_KEY or not REFRESH_SECRET_KEY:
+    raise ValueError("SECRET_KEY and REFRESH_SECRET_KEY must be set in the environment")
 
 # JWT 설정
-JWT_ACCESS_TOKEN_EXPIRES = 1  # Access 토큰 만료 시간 (단위: 시간)
-JWT_REFRESH_TOKEN_EXPIRES = 24 * 7  # Refresh 토큰 만료 시간 (단위: 시간)
+try:
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES')))
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES')))
+except (TypeError, ValueError):
+    raise ValueError("JWT_ACCESS_TOKEN_EXPIRES and JWT_REFRESH_TOKEN_EXPIRES must be valid integers")
 
 # 데이터베이스 설정
 DATABASE_CONFIG = {
@@ -18,3 +25,6 @@ DATABASE_CONFIG = {
     'password': os.getenv('DB_PASSWORD'),
     'database': os.getenv('DB_NAME')
 }
+
+if not all(DATABASE_CONFIG.values()):
+    raise ValueError("DATABASE_CONFIG variables (host, user, password, database) must be set in the environment")

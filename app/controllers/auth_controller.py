@@ -70,7 +70,6 @@ def login():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
-
 @auth_bp.route('/refresh', methods=['POST'])
 def refresh():
     """
@@ -107,8 +106,10 @@ def refresh():
 from flask import Blueprint, jsonify, request
 from app.models.user_model import User
 from app.utils.jwt_handler import decode_token
+from app.middlewares.auth import jwt_required
 
 @auth_bp.route('/profile', methods=['PUT'])
+@jwt_required()  # JWT 인증 필요
 def update_profile():
     """
     회원 정보 수정 API
@@ -160,6 +161,7 @@ def update_profile():
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @auth_bp.route('/delete', methods=['DELETE'])
+@jwt_required()  # JWT 인증 필요
 def delete_account():
     """
     회원 탈퇴 API

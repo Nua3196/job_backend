@@ -1,5 +1,7 @@
 import base64
 from app.utils.db import get_db
+import re
+import os
 
 class User:
     def __init__(self, id, email, password, role):
@@ -139,8 +141,23 @@ class User:
             None: 인증 실패 시
         """
         user = cls.get_user_by_email(email)
-        if user and user.password == cls.encode_password(password):
-            return user  # 인증 성공
+
+        if not user:
+            print(f"User with email {email} not found in the database.")
+            return None
+
+        # 저장된 비밀번호와 입력된 비밀번호 출력
+        print(f"Stored password: {user.password}")
+        print(f"Input password: {password}")
+
+        # 비밀번호 검증
+        if cls.verify_password(password, user.password):
+            print("Password verified successfully.")
+            return user
+        else:
+            print("Password verification failed.")
+        # if user and cls.verify_password(password, user.password):
+        #     return user  # 인증 성공
         return None  # 인증 실패
 
     def to_dict(self):
@@ -156,5 +173,165 @@ class User:
             'role': self.role
         }
 
-class Bookmark:
-    def __init__(self, id, user, job, created)
+    @staticmethod
+    def update_user(user_id, fields):
+        """
+        사용자의 특정 필드를 업데이트
+        Args:
+            user_id (int): 업데이트할 사용자 ID
+            fields (dict): 업데이트할 필드와 값
+        Returns:
+            dict: 성공 메시지 또는 에러 메시지
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            set_clause = ", ".join(f"{key} = %s" for key in fields.keys())
+            values = list(fields.values()) + [user_id]
+            cursor.execute(f"UPDATE user SET {set_clause} WHERE id = %s", values)
+            db.commit()
+            return {"message": "User updated successfully"}
+        except Exception as e:
+            return {"error": f"Failed to update user: {str(e)}"}
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def delete_user(user_id):
+        """
+        사용자를 데이터베이스에서 삭제
+        Args:
+            user_id (int): 삭제할 사용자 ID
+        Returns:
+            dict: 성공 메시지 또는 에러 메시지
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM user WHERE id = %s", (user_id,))
+            db.commit()
+            return {"message": "User deleted successfully"}
+        except Exception as e:
+            return {"error": f"Failed to delete user: {str(e)}"}
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def toggle_bookmark(user_id, job_id):
+        """
+        북마크 추가/제거 (토글)
+        Args:
+            user_id (int): 사용자 ID
+            job_id (int): 공고 ID
+        Returns:
+            dict: 성공 메시지 또는 에러 메시지
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            # 북마크 존재 여부 확인
+            cursor.execute("SELECT 1 FROM bookmark WHERE user = %s AND job = %s", (user_id, job_id))
+            if cursor.fetchone():
+                # 북마크 제거
+                cursor.execute("DELETE FROM bookmark WHERE user = %s AND job = %s", (user_id, job_id))
+                db.commit()
+                return {"message": "Bookmark removed"}
+            else:
+                # 북마크 추가
+                cursor.execute("INSERT INTO bookmark (user, job) VALUES (%s, %s)", (user_id, job_id))
+                db.commit()
+                return {"message": "Bookmark added"}
+        except Exception as e:
+            return {"error": f"Failed to toggle bookmark: {str(e)}"}
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def get_bookmarks(user_id):
+        """
+        사용자의 북마크 조회
+        Args:
+            user_id (int): 사용자 ID
+        Returns:
+            list: 북마크 목록
+        """
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT job.* FROM job
+                JOIN bookmark ON job.id = bookmark.job
+                WHERE bookmark.user = %s
+            """, (user_id,))
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def add_application(user_id, job_id):
+        """
+        지원 내역 추가
+        Args:
+            user_id (int): 사용자 ID
+            job_id (int): 공고 ID
+        Returns:
+            dict: 성공 메시지 또는 에러 메시지
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            # 중복 지원 방지
+            cursor.execute("SELECT 1 FROM application WHERE user = %s AND job = %s", (user_id, job_id))
+            if cursor.fetchone():
+                return {"error": "Already applied for this job"}
+            
+            # 지원 내역 추가
+            cursor.execute("INSERT INTO application (user, job) VALUES (%s, %s)", (user_id, job_id))
+            db.commit()
+            return {"message": "Application added"}
+        except Exception as e:
+            return {"error": f"Failed to add application: {str(e)}"}
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def get_applications(user_id):
+        """
+        사용자의 지원 내역 조회
+        Args:
+            user_id (int): 사용자 ID
+        Returns:
+            list: 지원 내역 목록
+        """
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT job.* FROM job
+                JOIN application ON job.id = application.job
+                WHERE application.user = %s
+            """, (user_id,))
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def delete_application(user_id, job_id):
+        """
+        지원 내역 삭제
+        Args:
+            user_id (int): 사용자 ID
+            job_id (int): 공고 ID
+        Returns:
+            dict: 성공 메시지 또는 에러 메시지
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM application WHERE user = %s AND job = %s", (user_id, job_id))
+            db.commit()
+            return {"message": "Application deleted"}
+        except Exception as e:
+            return {"error": f"Failed to delete application: {str(e)}"}
+        finally:
+            cursor.close()
