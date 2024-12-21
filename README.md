@@ -42,7 +42,7 @@ job_backend/
 │   ├── middlewares/        # 인증 및 권한 미들웨어
 │   ├── utils/              # 유틸리티 (DB, JWT, Redis 등)
 │   └── static/swagger.yaml # API 문서화 파일
-├── crawl_db_data/          # 크롤링 관련 파일
+├── crawl_db_data/          # 크롤링 및 DB 데이터 초기화 관련 파일
 ├── .env                    # 환경 변수 파일
 ├── requirements.txt        # 의존성 패키지 목록
 ├── run.py                  # Flask 앱 실행
