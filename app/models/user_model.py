@@ -183,6 +183,26 @@ class User:
         }
 
     @staticmethod
+    def get_user_by_id(user_id):
+        """
+        사용자 ID를 기준으로 사용자 정보를 조회
+        Args:
+            user_id (int): 조회할 사용자 ID
+        Returns:
+            User: User 객체
+        """
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT id, email, role, company, created_at FROM user WHERE id = %s", (user_id,))
+            user_data = cursor.fetchone()
+            if user_data:
+                return User(**user_data)  # User 객체로 변환
+            return None
+        finally:
+            cursor.close()
+
+    @staticmethod
     def update_user(user_id, fields):
         """
         사용자의 특정 필드를 업데이트
@@ -283,70 +303,37 @@ class User:
             cursor.close()
 
     @staticmethod
-    def add_application(user_id, job_id):
+    def add_application(user_id, job_id, content):
         """
-        지원 내역 추가
+        지원 내역 추가 (Application 모델 호출)
         Args:
             user_id (int): 사용자 ID
             job_id (int): 공고 ID
+            content (str): 지원 내용
         Returns:
             dict: 성공 메시지 또는 에러 메시지
         """
-        db = get_db()
-        cursor = db.cursor()
-        try:
-            # 중복 지원 방지
-            cursor.execute("SELECT 1 FROM application WHERE user = %s AND job = %s", (user_id, job_id))
-            if cursor.fetchone():
-                return {"error": "Already applied for this job"}
-            
-            # 지원 내역 추가
-            cursor.execute("INSERT INTO application (user, job) VALUES (%s, %s)", (user_id, job_id))
-            db.commit()
-            return {"message": "Application added"}
-        except Exception as e:
-            return {"error": f"Failed to add application: {str(e)}"}
-        finally:
-            cursor.close()
+        return Application.add(user_id, job_id, content)
 
     @staticmethod
     def get_applications(user_id):
         """
-        사용자의 지원 내역 조회
+        사용자의 지원 내역 조회 (Application 모델 호출)
         Args:
             user_id (int): 사용자 ID
         Returns:
             list: 지원 내역 목록
         """
-        db = get_db()
-        cursor = db.cursor(dictionary=True)
-        try:
-            cursor.execute("""
-                SELECT job.* FROM job
-                JOIN application ON job.id = application.job
-                WHERE application.user = %s
-            """, (user_id,))
-            return cursor.fetchall()
-        finally:
-            cursor.close()
+        return Application.get_by_user(user_id)
 
     @staticmethod
     def delete_application(user_id, job_id):
         """
-        지원 내역 삭제
+        지원 내역 삭제 (Application 모델 호출)
         Args:
             user_id (int): 사용자 ID
             job_id (int): 공고 ID
         Returns:
             dict: 성공 메시지 또는 에러 메시지
         """
-        db = get_db()
-        cursor = db.cursor()
-        try:
-            cursor.execute("DELETE FROM application WHERE user = %s AND job = %s", (user_id, job_id))
-            db.commit()
-            return {"message": "Application deleted"}
-        except Exception as e:
-            return {"error": f"Failed to delete application: {str(e)}"}
-        finally:
-            cursor.close()
+        return Application.delete(user_id, job_id)

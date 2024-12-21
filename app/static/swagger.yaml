@@ -1,114 +1,153 @@
-swagger: "2.0"
+openapi: 3.0.0
 info:
-  version: "1.0.0"
-  title: "Job Management API"
-  description: "Comprehensive API documentation for the Job Management System."
-host: "localhost:5000"
-basePath: "/api"
-schemes:
-  - "http"
+  title: Authentication, Company, Job, Statistics, and User API
+  description: API for managing user authentication, company records, job postings, statistical data, and user interactions.
+  version: 1.0.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 paths:
-  /auth/signup:
+  /api/auth/logout:
     post:
-      summary: "User Signup"
-      description: "Registers a new user account."
       tags:
-        - "Auth"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "User registration data"
-          required: true
-          schema:
-            type: "object"
-            properties:
-              email:
-                type: "string"
-              password:
-                type: "string"
-              role:
-                type: "string"
-                enum: ["admin", "employer", "applicant"]
-              company_name:
-                type: "string"
-                description: "Required if the role is 'employer'"
-              company_link:
-                type: "string"
-                description: "Required if the role is 'employer'"
+        - Auth
+      summary: User Logout
+      description: Logs out a user by invalidating the provided refresh token.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: The refresh token to invalidate.
+      responses:
+        200:
+          description: User logged out successfully.
+        400:
+          description: Refresh token is missing or invalid.
+        500:
+          description: Internal server error.
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: User Signup
+      description: Creates a new user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: ["admin", "employer", "applicant"]
+                company_name:
+                  type: string
+                  description: Required if the role is employer.
+                company_link:
+                  type: string
+                  description: Required if the role is employer.
       responses:
         201:
-          description: "User created successfully."
+          description: User created successfully.
         400:
-          description: "Validation error."
+          description: Validation error.
         500:
-          description: "Internal server error."
-  /auth/login:
+          description: Internal server error.
+  /api/auth/login:
     post:
-      summary: "User Login"
-      description: "Logs in a user and provides access and refresh tokens."
       tags:
-        - "Auth"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "User login data"
-          required: true
-          schema:
-            type: "object"
-            properties:
-              email:
-                type: "string"
-              password:
-                type: "string"
+        - Auth
+      summary: User Login
+      description: Logs in a user and provides access and refresh tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
       responses:
         200:
-          description: "Login successful. Returns tokens."
+          description: Login successful.
         401:
-          description: "Invalid credentials."
+          description: Invalid credentials.
         500:
-          description: "Internal server error."
-  /companies:
-    get:
-      summary: "List Companies"
-      description: "Fetches a list of all registered companies."
+          description: Internal server error.
+  /api/auth/refresh:
+    post:
       tags:
-        - "Company"
-      produces:
-        - "application/json"
+        - Auth
+      summary: Token Refresh
+      description: Refreshes the access token using a valid refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: The refresh token to use for generating a new access token.
       responses:
         200:
-          description: "List of companies."
+          description: New access token generated.
+        403:
+          description: Token is blacklisted.
+        401:
+          description: Invalid or expired refresh token.
         500:
-          description: "Internal server error."
-    post:
-      summary: "Add Company"
-      description: "Creates a new company. Requires admin access."
+          description: Internal server error.
+  /api/companies/:
+    get:
       tags:
-        - "Company"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Company creation data"
-          required: true
-          schema:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-              link:
-                type: "string"
+        - Company
+      summary: List all companies
+      description: Fetch a list of all companies.
+      responses:
+        200:
+          description: List of companies fetched successfully.
+        500:
+          description: Internal server error.
+    post:
+      tags:
+        - Company
+      summary: "Add a new company"
+      description: "Create a new company record."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: "Name of the company."
+                link:
+                  type: string
+                  description: "Link to the company website."
       responses:
         201:
           description: "Company created successfully."
@@ -116,65 +155,163 @@ paths:
           description: "Validation error."
         500:
           description: "Internal server error."
-  /jobs:
+  /api/companies/{company_id}:
     get:
-      summary: "List Jobs"
-      description: "Retrieves all job postings with optional sorting and pagination."
       tags:
-        - "Job"
-      produces:
-        - "application/json"
+        - Company
+      summary: Get company details
+      description: Fetch details of a specific company by its ID.
       parameters:
-        - in: "query"
-          name: "page"
-          description: "Page number."
-          type: "integer"
-        - in: "query"
-          name: "size"
-          description: "Page size."
-          type: "integer"
-        - in: "query"
-          name: "sort_by"
-          description: "Field to sort by."
-          type: "string"
-        - in: "query"
-          name: "order"
-          description: "Sort order (asc or desc)."
-          type: "string"
-      responses:
-        200:
-          description: "List of jobs."
-        500:
-          description: "Internal server error."
-    post:
-      summary: "Add Job"
-      description: "Creates a new job posting. Requires admin or employer access."
-      tags:
-        - "Job"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Job creation data"
+        - in: path
+          name: company_id
           required: true
           schema:
-            type: "object"
-            properties:
-              title:
-                type: "string"
-              link:
-                type: "string"
-              career_condition:
-                type: "string"
-              education:
-                type: "string"
-              deadline:
-                type: "string"
-              job_sector:
-                type: "string"
+            type: integer
+          description: ID of the company to fetch.
+      responses:
+        200:
+          description: Company details fetched successfully.
+        404:
+          description: Company not found.
+        500:
+          description: Internal server error.
+    put:
+      tags:
+        - Company
+      summary: "Update company details"
+      description: "Update details of an existing company."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: integer
+          description: "ID of the company to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: "New name of the company."
+                link:
+                  type: string
+                  description: "New link to the company website."
+      responses:
+        200:
+          description: "Company updated successfully."
+        400:
+          description: "Validation error."
+        500:
+          description: "Internal server error."
+    delete:
+      tags:
+        - Company
+      summary: "Delete a company"
+      description: "Delete a company by its ID."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: integer
+          description: "ID of the company to delete."
+      responses:
+        200:
+          description: "Company deleted successfully."
+        400:
+          description: "Validation error."
+        500:
+          description: "Internal server error."
+  /api/jobs/:
+    get:
+      tags:
+        - Jobs
+      summary: List Jobs
+      description: Retrieve a list of jobs with pagination and sorting.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number.
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+          description: Number of items per page.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+            default: "id"
+          description: Field to sort by.
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: "desc"
+          description: Sort order.
+      responses:
+        200:
+          description: List of jobs retrieved successfully.
+        500:
+          description: Internal server error.
+    post:
+      tags:
+        - Jobs
+      summary: "Add a Job"
+      description: "Create a new job posting."
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: "Title of the job."
+                link:
+                  type: string
+                  description: "Link to the job posting."
+                career_condition:
+                  type: string
+                  description: "Career condition required for the job."
+                education:
+                  type: string
+                  description: "Education level required for the job."
+                deadline:
+                  type: string
+                  description: "Application deadline for the job."
+                job_sector:
+                  type: string
+                  description: "Sector of the job."
+                company:
+                  type: integer
+                  description: "Company ID (required for admin users)."
+                tech_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: "List of technology IDs associated with the job."
+                location_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: "List of location IDs associated with the job."
       responses:
         201:
           description: "Job created successfully."
@@ -182,29 +319,449 @@ paths:
           description: "Validation error."
         500:
           description: "Internal server error."
-  /stats/companies:
+  /api/jobs/{job_id}:
     get:
-      summary: "Company Job Stats"
-      description: "Retrieves the count of jobs posted by each company."
       tags:
-        - "Stats"
-      produces:
-        - "application/json"
+        - Jobs
+      summary: Get Job Details
+      description: Retrieves detailed information for a specific job.
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the job to retrieve details for.
       responses:
         200:
-          description: "Job count per company."
+          description: Job details returned successfully.
+        404:
+          description: Job not found.
         500:
-          description: "Internal server error."
-  /stats/techs:
-    get:
-      summary: "Tech Job Stats"
-      description: "Retrieves the count of jobs requiring each technology."
+          description: Internal server error.
+    put:
       tags:
-        - "Stats"
-      produces:
-        - "application/json"
+        - Jobs
+      summary: "Update Job"
+      description: "Updates an existing job posting."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the job to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                company:
+                  type: integer
+                creator:
+                  type: integer
+                career_condition:
+                  type: string
+                education:
+                  type: string
+                deadline:
+                  type: string
+                job_sector:
+                  type: string
+                tech_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: "List of technology IDs to associate with the job."
+                location_ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: "List of location IDs to associate with the job."
       responses:
         200:
-          description: "Job count per technology."
+          description: "Job updated successfully."
+        400:
+          description: "Validation error."
         500:
           description: "Internal server error."
+    delete:
+      tags:
+        - Jobs
+      summary: "Delete Job"
+      description: "Deletes a job posting."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the job to delete."
+      responses:
+        200:
+          description: "Job deleted successfully."
+        404:
+          description: "Job not found."
+        500:
+          description: "Internal server error."
+  /api/jobs/search:
+    get:
+      tags:
+        - Jobs
+      summary: Search Jobs
+      description: Searches and filters job postings based on various criteria.
+      parameters:
+        - in: query
+          name: keyword
+          schema:
+            type: string
+          description: Search keyword for job titles or descriptions.
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Location filter.
+        - in: query
+          name: tech
+          schema:
+            type: string
+          description: Technology filter.
+        - in: query
+          name: career_condition
+          schema:
+            type: string
+          description: Career condition filter.
+      responses:
+        200:
+          description: Search results returned successfully.
+        500:
+          description: Internal server error.
+  /api/jobs/{job_id}/applications:
+    get:
+      tags:
+        - Job Applications
+      summary: "List Applications for a Job"
+      description: >
+        Retrieves a list of applications for a specific job. 
+        Only accessible by the job creator.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the job to retrieve applications for."
+      responses:
+        200:
+          description: "List of applications retrieved successfully."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user:
+                      type: integer
+                    email:
+                      type: string
+                    role:
+                      type: string
+                      enum: ["admin", "employer", "applicant"]
+                    content:
+                      type: string
+                      description: "The content of the application."
+                    created_at:
+                      type: string
+                      format: date-time
+        403:
+          description: "Permission denied."
+        404:
+          description: "Job not found or no applications."
+        500:
+          description: "Internal server error."
+  /api/stats/companies:
+    get:
+      tags:
+        - Statistics
+      summary: Company Statistics
+      description: Retrieves the number of job postings for each company.
+      responses:
+        200:
+          description: Company statistics retrieved successfully.
+        500:
+          description: Internal server error.
+  /api/stats/techs:
+    get:
+      tags:
+        - Statistics
+      summary: Technology Statistics
+      description: Retrieves the number of job postings for each technology.
+      responses:
+        200:
+          description: Technology statistics retrieved successfully.
+        500:
+          description: Internal server error.
+  /api/stats/jobs:
+    get:
+      tags:
+        - Statistics
+      summary: Job Application Statistics
+      description: Retrieves the number of applications for each job posting.
+      responses:
+        200:
+          description: Job application statistics retrieved successfully.
+        500:
+          description: Internal server error.
+  /api/users/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: "Get User Details"
+      description: "Retrieve details of a specific user by their ID."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user to retrieve."
+      responses:
+        200:
+          description: "User details retrieved successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum: ["admin", "employer", "applicant"]
+                  company:
+                    type: integer
+                    nullable: true
+                  created_at:
+                    type: string
+                    format: date-time
+        403:
+          description: "Permission denied."
+        404:
+          description: "User not found."
+        500:
+          description: "Internal server error."
+    put:
+      tags:
+        - Users
+      summary: "Update User Information"
+      description: >
+        Allows a user to update their own information.
+        Admin users can update any user's information, including roles.
+        Non-admin users can only update their own information, such as passwords.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user to update."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: >
+                    New password for the user. Must be at least 8 characters long.
+                role:
+                  type: string
+                  enum: ["admin", "employer", "applicant"]
+                  description: >
+                    New role for the user. Only admins can modify this field.
+      responses:
+        200:
+          description: "User updated successfully."
+        400:
+          description: >
+            Validation error. For example, password does not meet the minimum length.
+        403:
+          description: >
+            Permission denied. Non-admin users cannot update roles or other users' information.
+        500:
+          description: "Internal server error."
+    delete:
+      tags:
+        - Users
+      summary: "Delete User"
+      description: "Allows a user to delete their own account. Admins can delete any user's account."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user to delete."
+      responses:
+        200:
+          description: "User account deleted successfully."
+        403:
+          description: "Permission denied."
+        404:
+          description: "User not found."
+        500:
+          description: "Internal server error."
+  /api/users/{user_id}/bookmarks:
+    post:
+      tags:
+        - User Bookmarks
+      summary: "Toggle Bookmark"
+      description: "Adds or removes a bookmark for a job posting."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: integer
+                  description: "The ID of the job to bookmark."
+      responses:
+        200:
+          description: "Bookmark toggled successfully."
+        400:
+          description: "Validation error."
+        403:
+          description: "Permission denied."
+    get:
+      tags:
+        - User Bookmarks
+      summary: "List Bookmarks"
+      description: "Retrieves the list of bookmarked job postings for a user."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user."
+      responses:
+        200:
+          description: "Bookmarks retrieved successfully."
+        403:
+          description: "Permission denied."
+  /api/users/{user_id}/applications:
+    post:
+      tags:
+        - User Applications
+      summary: "Add Application"
+      description: "Adds a new job application for a user."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: integer
+                  description: "The ID of the job to apply for."
+                content:
+                  type: string
+                  description: "The content of the application."
+      responses:
+        201:
+          description: "Application added successfully."
+        400:
+          description: "Validation error."
+        403:
+          description: "Permission denied."
+    get:
+      tags:
+        - User Applications
+      summary: "List Applications"
+      description: "Retrieves the list of job applications for a user."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user."
+      responses:
+        200:
+          description: "Applications retrieved successfully."
+        403:
+          description: "Permission denied."
+  /api/users/{user_id}/applications/{job_id}:
+    delete:
+      tags:
+        - User Applications
+      summary: "Delete Application"
+      description: "Deletes a job application for a user."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the user."
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+          description: "The ID of the job application to delete."
+      responses:
+        200:
+          description: "Application deleted successfully."
+        403:
+          description: "Permission denied."

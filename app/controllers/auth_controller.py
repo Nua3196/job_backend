@@ -7,10 +7,31 @@ from app.middlewares.auth import jwt_required
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
     """
-    로그아웃 API
-    - 클라이언트에서 Refresh Token을 제공받아 블랙리스트에 추가
+    ---
+    tags:
+      - Auth
+    summary: "User Logout"
+    description: "Logs out a user by invalidating the provided refresh token."
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              refresh_token:
+                type: string
+                description: "The refresh token to invalidate."
+    responses:
+      200:
+        description: "User logged out successfully."
+      400:
+        description: "Refresh token is missing or invalid."
+      500:
+        description: "Internal server error."
     """
     try:
         data = request.json
@@ -19,14 +40,8 @@ def logout():
         if not refresh_token:
             return jsonify({"error": "Refresh token is required"}), 400
 
-        # Refresh Token 검증
-        decoded_token = decode_token(refresh_token, is_refresh=True)
-        if not decoded_token:
-            return jsonify({"error": "Invalid or expired refresh token"}), 401
-
         # Refresh Token 블랙리스트 추가
         add_to_blacklist(refresh_token)
-
         return jsonify({"message": "Logged out successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -34,9 +49,38 @@ def logout():
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     """
-    회원가입 API
-    - 요청 데이터(JSON): email, password, role, company (optional)
-    - 사용자 추가 후 성공/실패 메시지 반환
+    ---
+    tags:
+      - Auth
+    summary: "User Signup"
+    description: "Creates a new user account."
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              role:
+                type: string
+                enum: ["admin", "employer", "applicant"]
+              company_name:
+                type: string
+                description: "Required if the role is employer."
+              company_link:
+                type: string
+                description: "Required if the role is employer."
+    responses:
+      201:
+        description: "User created successfully."
+      400:
+        description: "Validation error."
+      500:
+        description: "Internal server error."
     """
     try:
         data = request.json
@@ -81,8 +125,29 @@ def signup():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """
-    사용자 로그인 처리
-    - Access 토큰과 Refresh 토큰을 생성하여 반환
+    ---
+    tags:
+      - Auth
+    summary: "User Login"
+    description: "Logs in a user and provides access and refresh tokens."
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+    responses:
+      200:
+        description: "Login successful."
+      401:
+        description: "Invalid credentials."
+      500:
+        description: "Internal server error."
     """
     try:
         data = request.json
@@ -112,7 +177,30 @@ def login():
 @auth_bp.route('/refresh', methods=['POST'])
 def refresh():
     """
-    Refresh 토큰을 사용해 새로운 Access 토큰 발급
+    ---
+    tags:
+      - Auth
+    summary: "Token Refresh"
+    description: "Refreshes the access token using a valid refresh token."
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              refresh_token:
+                type: string
+                description: "The refresh token to use for generating a new access token."
+    responses:
+      200:
+        description: "New access token generated."
+      403:
+        description: "Token is blacklisted."
+      401:
+        description: "Invalid or expired refresh token."
+      500:
+        description: "Internal server error."
     """
     try:
         data = request.json
@@ -137,90 +225,5 @@ def refresh():
             "role": decoded_token['role']
         })
         return jsonify({"access_token": access_token}), 200
-    except Exception as e:
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
-@auth_bp.route('/profile', methods=['PUT'])
-@jwt_required()  # JWT 인증 필요
-def update_profile():
-    """
-    회원 정보 수정 API
-    - 요청 데이터(JSON): password, role
-    - JWT 토큰에서 사용자 ID 추출 후 해당 사용자 정보 수정
-    """
-    try:
-        # JWT 토큰 검증 및 사용자 ID 추출
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return jsonify({"error": "Authorization header is required"}), 401
-
-        token = auth_header.split(" ")[1]
-        decoded_token = decode_token(token)
-
-        if not decoded_token:
-            return jsonify({"error": "Invalid or expired token"}), 401
-
-        user_id = decoded_token.get('id')
-        if not user_id:
-            return jsonify({"error": "Invalid token payload"}), 400
-
-        # 요청 데이터
-        data = request.json
-        password = data.get('password')
-        role = data.get('role')
-
-        # 역할 변경 권한 확인 (관리자만 가능)
-        if role and decoded_token.get('role') != 'admin':
-            return jsonify({"error": "Permission denied to change role"}), 403
-
-        # 사용자 정보 업데이트
-        update_fields = {}
-        if password:
-            update_fields['password'] = User.encode_password(password)
-        if role:
-            update_fields['role'] = role
-
-        if not update_fields:
-            return jsonify({"error": "No valid fields to update"}), 400
-
-        result = User.update_user(user_id, update_fields)
-        if "error" in result:
-            return jsonify(result), 400
-
-        return jsonify({"message": "User profile updated successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
-@auth_bp.route('/delete', methods=['DELETE'])
-@jwt_required()  # JWT 인증 필요
-def delete_account():
-    """
-    회원 탈퇴 API
-    - JWT 토큰에서 사용자 ID를 추출하여 해당 계정 삭제
-    """
-    try:
-        # JWT 토큰 검증 및 사용자 ID 추출
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return jsonify({"error": "Authorization header is required"}), 401
-
-        token = auth_header.split(" ")[1]
-        decoded_token = decode_token(token)
-
-        if not decoded_token:
-            return jsonify({"error": "Invalid or expired token"}), 401
-
-        user_id = decoded_token.get('id')
-        if not user_id:
-            return jsonify({"error": "Invalid token payload"}), 400
-
-        # 사용자 삭제
-        result = User.delete_user(user_id)
-        if "error" in result:
-            return jsonify(result), 400
-
-        return jsonify({"message": "User account deleted successfully"}), 200
-
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500

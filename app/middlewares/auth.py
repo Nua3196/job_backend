@@ -9,7 +9,7 @@ def jwt_required(required_roles=None):
         required_roles (list, optional): 허용된 역할 목록 (예: ['admin', 'employer']). 기본값은 None.
     """
     def decorator(func):
-        @wraps(func) # wraps 적용으로 함수 이름 유지지
+        @wraps(func) # wraps 적용으로 함수 이름 유지
         def wrapper(*args, **kwargs):
             # Authorization 헤더 확인
             auth_header = request.headers.get('Authorization')

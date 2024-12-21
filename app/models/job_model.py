@@ -250,3 +250,21 @@ class Job:
             return job
         finally:
             cursor.close()
+
+    @staticmethod
+    def get_creator_id(job_id):
+        """
+        특정 공고의 작성자 ID를 반환
+        Args:
+            job_id (int): 공고 ID
+        Returns:
+            int: 작성자 ID 또는 None
+        """
+        db = get_db()
+        cursor = db.cursor()
+        try:
+            cursor.execute("SELECT creator FROM job WHERE id = %s", (job_id,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+        finally:
+            cursor.close()
