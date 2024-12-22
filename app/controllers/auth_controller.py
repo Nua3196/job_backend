@@ -7,14 +7,21 @@ from app.middlewares.auth import jwt_required
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/logout', methods=['POST'])
-@jwt_required()
+@jwt_required()  # Access Token 검증
 def logout():
     """
     ---
     tags:
       - Auth
     summary: "User Logout"
-    description: "Logs out a user by invalidating the provided refresh token."
+    description: >
+      Logs out a user by invalidating their Access and Refresh tokens.
+      Both tokens will be added to the blacklist, and any subsequent use of 
+      these tokens will result in a `403 Forbidden` error.
+
+    security:
+      - bearerAuth: []  # Access Token 인증 필요
+
     requestBody:
       required: true
       content:
@@ -24,14 +31,23 @@ def logout():
             properties:
               refresh_token:
                 type: string
-                description: "The refresh token to invalidate."
+                description: "The Refresh Token to invalidate."
+          required:
+            - refresh_token
+
     responses:
       200:
-        description: "User logged out successfully."
+        description: >
+          "Logged out successfully. Both Access and Refresh tokens have been invalidated."
       400:
-        description: "Refresh token is missing or invalid."
+        description: >
+          "Invalid or missing Refresh Token."
+      403:
+        description: >
+          "The token is invalidated (blacklisted)."
       500:
-        description: "Internal server error."
+        description: >
+          "An internal server error occurred."
     """
     try:
         data = request.json
@@ -40,8 +56,15 @@ def logout():
         if not refresh_token:
             return jsonify({"error": "Refresh token is required"}), 400
 
-        # Refresh Token 블랙리스트 추가
-        add_to_blacklist(refresh_token)
+        # Refresh Token 검증
+        decoded_refresh_token = decode_token(refresh_token, is_refresh=True)
+        if "error" in decoded_refresh_token:
+            return jsonify({"error": "Invalid or expired refresh token"}), 401
+
+        # Access Token 및 Refresh Token 블랙리스트 추가
+        add_to_blacklist(request.headers.get('Authorization').split(" ")[1])  # Access Token
+        add_to_blacklist(refresh_token)  # Refresh Token
+
         return jsonify({"message": "Logged out successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -181,7 +204,10 @@ def refresh():
     tags:
       - Auth
     summary: "Token Refresh"
-    description: "Refreshes the access token using a valid refresh token."
+    description: >
+      Refreshes the access token using a valid refresh token.
+      If the refresh token is blacklisted, the request will be denied.
+
     requestBody:
       required: true
       content:
@@ -192,15 +218,22 @@ def refresh():
               refresh_token:
                 type: string
                 description: "The refresh token to use for generating a new access token."
+          required:
+            - refresh_token
+
     responses:
       200:
-        description: "New access token generated."
+        description: >
+          "New access token generated successfully."
       403:
-        description: "Token is blacklisted."
+        description: >
+          "Refresh token is blacklisted or has been logged out."
       401:
-        description: "Invalid or expired refresh token."
+        description: >
+          "Invalid or expired refresh token."
       500:
-        description: "Internal server error."
+        description: >
+          "An internal server error occurred."
     """
     try:
         data = request.json
@@ -209,16 +242,12 @@ def refresh():
         if not refresh_token:
             return jsonify({"error": "Refresh token is required"}), 400
 
-        # 블랙리스트 확인
-        if is_token_blacklisted(refresh_token):
-            return jsonify({"error": "This token has been logged out"}), 403
-
         # Refresh Token 검증
         decoded_token = decode_token(refresh_token, is_refresh=True)
-        if not decoded_token:
-            return jsonify({"error": "Invalid or expired refresh token"}), 401
+        if "error" in decoded_token:
+            return jsonify(decoded_token), 401  # decode_token에서 반환된 에러 메시지 전달
 
-        # 새로운 Access 토큰 발급
+        # 새로운 Access Token 발급
         access_token = generate_access_token({
             "id": decoded_token['id'],
             "email": decoded_token['email'],

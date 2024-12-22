@@ -1,15 +1,17 @@
 import base64
 from app.utils.db import get_db
+from app.models.application_model import Application
 import re
 import os
 
 class User:
-    def __init__(self, id, email, password, role, company=None):
+    def __init__(self, id, email, role, created_at, password=None, company=None):
         self.id = id
         self.email = email
         self.password = password  # Base64로 인코딩된 비밀번호
         self.role = role
         self.company = company
+        self.created_at = created_at
 
     @staticmethod
     def encode_password(password):
@@ -55,7 +57,7 @@ class User:
         db = get_db()
         cursor = db.cursor(dictionary=True)
         try:
-            cursor.execute("SELECT id, email, password, role, company FROM user WHERE email = %s", (email,))
+            cursor.execute("SELECT id, email, password, role, company, created_at FROM user WHERE email = %s", (email,))
             user_data = cursor.fetchone()
             if user_data:
                 return User(**user_data)  # User 객체로 변환
@@ -179,7 +181,8 @@ class User:
             'id': self.id,
             'email': self.email,
             'role': self.role,
-            'company': self.company
+            'company': self.company,
+            'created_at': self.created_at
         }
 
     @staticmethod

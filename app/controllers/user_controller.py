@@ -70,6 +70,9 @@ def update_user(user_id):
           schema:
             type: object
             properties:
+              email:
+                type: string
+                description: "New email for the user."
               password:
                 type: string
                 description: "New password for the user."
@@ -77,6 +80,9 @@ def update_user(user_id):
                 type: string
                 enum: ["admin", "employer", "applicant"]
                 description: "New role for the user (Admins only)."
+              company:
+                type: integer
+                description: "New company ID for the user (Admins or Employers only)."
     responses:
       200:
         description: "User updated successfully."
@@ -96,22 +102,44 @@ def update_user(user_id):
             return jsonify({"error": "Permission denied"}), 403
 
         data = request.json
+        email = data.get('email')
         password = data.get('password')
         new_role = data.get('role')
-
-        # 역할 변경은 관리자만 가능
-        if new_role and current_role != 'admin':
-            return jsonify({"error": "Permission denied to change role"}), 403
-
-        # 비밀번호 유효성 검증
-        if password and len(password) < 8:
-            return jsonify({"error": "Password must be at least 8 characters long"}), 400
+        company = data.get('company')
 
         update_fields = {}
+
+        # 이메일 유효성 검증 및 중복 확인
+        if email:
+            if not User.is_valid_email(email):
+                return jsonify({"error": "Invalid email format"}), 400
+
+            # 중복 이메일 확인
+            existing_user = User.get_user_by_email(email)
+            if existing_user and existing_user.id != user_id:
+                return jsonify({"error": f"Email '{email}' is already in use"}), 400
+
+            update_fields['email'] = email
+
+        # 비밀번호 유효성 검증 및 업데이트
         if password:
+            if len(password) < 8:
+                return jsonify({"error": "Password must be at least 8 characters long"}), 400
             update_fields['password'] = User.encode_password(password)
+
+        # 역할 변경은 관리자만 가능
         if new_role:
+            if current_role != 'admin':
+                return jsonify({"error": "Permission denied to change role"}), 403
             update_fields['role'] = new_role
+
+        # 회사 ID 유효성 검증 및 업데이트
+        if company:
+            if current_role != 'admin' and current_role != 'employer':
+                return jsonify({"error": "Permission denied to update company"}), 403
+            if not Company.validate(company):
+                return jsonify({"error": f"Invalid company ID: {company}"}), 400
+            update_fields['company'] = company
 
         if not update_fields:
             return jsonify({"error": "No valid fields to update"}), 400

@@ -5,7 +5,7 @@ from app.config import DATABASE_CONFIG
 # 데이터베이스 연결 풀 생성
 db_pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
-    pool_size=10,  # 풀 크기
+    pool_size=30,  # 풀 크기
     **DATABASE_CONFIG
 )
 

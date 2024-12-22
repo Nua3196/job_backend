@@ -131,7 +131,7 @@ class Job:
                 cursor.execute("INSERT INTO job_location (job, location) VALUES (%s, %s)", (job_id, location_id))
 
             db.commit()
-            return {"message": "Job created successfully"}
+            return {"id": job_id, "message": "Job created successfully"}
         finally:
             cursor.close()
 
@@ -152,27 +152,37 @@ class Job:
         db = get_db()
         cursor = db.cursor(dictionary=True)
         try:
-            query = "SELECT * FROM job"
+            query = """
+                SELECT job.*, company.name AS company_name 
+                FROM job
+                JOIN company ON job.company = company.id
+            """
             conditions = []
             values = []
 
+            # 키워드 검색 (공고 제목 또는 회사명)
             if filters.get('keyword'):
-                conditions.append("(title LIKE %s OR company LIKE %s)")
+                conditions.append("(job.title LIKE %s OR company.name LIKE %s)")
                 keyword = f"%{filters['keyword']}%"
                 values.extend([keyword, keyword])
 
+            # 위치 필터
             if filters.get('location'):
-                conditions.append("id IN (SELECT job FROM job_location WHERE location = %s)")
+                conditions.append("job.id IN (SELECT job FROM job_location WHERE location = %s)")
                 values.append(filters['location'])
 
+            # 기술 스택 필터
             if filters.get('tech'):
-                conditions.append("id IN (SELECT job FROM job_tech WHERE tech = %s)")
+                conditions.append("job.id IN (SELECT job FROM job_tech WHERE tech = %s)")
                 values.append(filters['tech'])
 
+            # 경력 조건 키워드 검색
             if filters.get('career_condition'):
-                conditions.append("career_condition = %s")
-                values.append(filters['career_condition'])
+                conditions.append("job.career_condition LIKE %s")
+                career_condition_keyword = f"%{filters['career_condition']}%"
+                values.append(career_condition_keyword)
 
+            # 조건 추가
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 

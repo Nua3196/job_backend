@@ -49,26 +49,26 @@ class Stats:
         finally:
             cursor.close()
 
-@staticmethod
-def get_job_application_count():
-    """
-    공고별 지원 수 통계
-    Returns:
-        list: 공고 제목, 지원 수, 전체 지원 대비 비율
-    """
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    try:
-        cursor.execute("""
-            SELECT 
-                job.title AS job_title,
-                COUNT(application.user) AS application_count,
-                ROUND((COUNT(application.user) / (SELECT COUNT(*) FROM application)) * 100, 2) AS percentage
-            FROM job
-            LEFT JOIN application ON job.id = application.job
-            GROUP BY job.title
-            ORDER BY application_count DESC
-        """)
-        return cursor.fetchall()
-    finally:
-        cursor.close()
+    @staticmethod
+    def get_job_application_count():
+        """
+        공고별 지원 수 통계
+        Returns:
+            list: 공고 제목, 지원 수, 전체 지원 대비 비율
+        """
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT 
+                    job.title AS job_title,
+                    COUNT(application.user) AS application_count,
+                    ROUND((COUNT(application.user) / (SELECT COUNT(*) FROM application)) * 100, 2) AS percentage
+                FROM job
+                LEFT JOIN application ON job.id = application.job
+                GROUP BY job.title
+                ORDER BY application_count DESC
+            """)
+            return cursor.fetchall()
+        finally:
+            cursor.close()

@@ -87,7 +87,7 @@ class Application:
         cursor = db.cursor(dictionary=True)
         try:
             cursor.execute("""
-                SELECT a.id, a.user, u.email, u.role, a.content, a.created_at
+                SELECT a.user, u.email, u.role, a.content, a.created_at
                 FROM application a
                 JOIN user u ON a.user = u.id
                 WHERE a.job = %s

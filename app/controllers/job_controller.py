@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.models.job_model import Job
+from app.models.application_model import Application
 from app.middlewares.auth import jwt_required
 
 # Blueprint: API 엔드포인트 그룹화
@@ -292,32 +293,32 @@ def delete_job(job_id):
 @job_bp.route('/search', methods=['GET'])
 def search_jobs():
     """
-    ---
+    --- 
     tags:
       - Jobs
     summary: "Search Jobs"
-    description: "Searches and filters job postings based on various criteria."
+    description: "Searches and filters job postings based on various criteria, including partial matching for career_condition."
     parameters:
       - in: query
         name: keyword
         schema:
           type: string
-        description: "Search keyword for job titles or descriptions."
+        description: "Search keyword for job titles or company names (partial match)."
       - in: query
         name: location
         schema:
           type: string
-        description: "Location filter."
+        description: "Location filter (ID)."
       - in: query
         name: tech
         schema:
           type: string
-        description: "Technology filter."
+        description: "Technology filter (ID)."
       - in: query
         name: career_condition
         schema:
           type: string
-        description: "Career condition filter."
+        description: "Keyword for career condition (e.g., '3년') (partial match)."
     responses:
       200:
         description: "Search results returned successfully."
