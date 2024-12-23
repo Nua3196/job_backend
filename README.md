@@ -99,7 +99,7 @@ pip install -r requirements.txt
 ### 6. 크롤링 데이터 처리
 - 사전에 관리자 권한 계정 생성:
   ```bash
-  python user_admin.py
+  python crawl_db_data/user_admin.py
   ```
 생성한 관리자 id를 크롤링한 채용공고의 creator로 사용합니다. job_company.py의 admin_id를 해당 id로 변경합니다.
 
