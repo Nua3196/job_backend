@@ -21,9 +21,10 @@ except (TypeError, ValueError):
 # 데이터베이스 설정
 DATABASE_CONFIG = {
     'host': os.getenv('DB_HOST'),
+    'port': os.getenv('DB_PORT'),
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
-    'database': os.getenv('DB_NAME')
+    'database': os.getenv('DB_NAME'),
 }
 
 if not all(DATABASE_CONFIG.values()):
