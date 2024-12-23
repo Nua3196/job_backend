@@ -119,7 +119,7 @@ python run.py
 ## API 문서
 Swagger UI를 통해 API 엔드포인트를 확인하고 테스트할 수 있습니다.
 
-- **Swagger URL**: <https://your-deployed-swagger-url>
+- **Swagger URL**: <http://113.198.66.75:17253/api/docs/#/>
 
 ---
 
