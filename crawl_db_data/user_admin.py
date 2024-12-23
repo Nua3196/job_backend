@@ -83,14 +83,14 @@ def add_user(email, password, role, company=None):
 
 # 스크립트 실행
 if __name__ == "__main__":
-    # # 사용자 정보
-    # user_info = {
-    #     "email": "mytale3@gmail.com",
-    #     "password": "wsd@19462",  # 평문 비밀번호
-    #     "role": "admin",
-    #     "company": None  # 관리자는 회사와 무관
-    # }
+    # 사용자 정보
+    user_info = {
+        "email": "mytale3@gmail.com",
+        "password": "wsd@19462",  # 평문 비밀번호
+        "role": "admin",
+        "company": None  # 관리자는 회사와 무관
+    }
 
-    # # 사용자 추가
-    # admin_id = add_user(**user_info)
-    # print(f"관리자 ID: {admin_id}")
+    # 사용자 추가
+    admin_id = add_user(**user_info)
+    print(f"관리자 ID: {admin_id}")

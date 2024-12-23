@@ -15,7 +15,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 # 관리자의 ID
-admin_id = 2
+admin_id = 7
 
 # 회사 저장 또는 조회 함수
 def get_or_create_company(name, link):
